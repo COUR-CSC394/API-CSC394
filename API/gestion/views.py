@@ -96,3 +96,42 @@ class ProduitDetailAPIView(APIView):
         produit = self.get_object(pk)
         produit.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+    
+# Vente Views
+class VenteListCreateAPIView(APIView):
+    def get(self, request):
+        ventes = Vente.objects.all()
+        serializer = VenteSerializer(ventes, many=True)
+        return Response(serializer.data)
+
+    def post(self, request):
+        serializer = VenteSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class VenteDetailAPIView(APIView):
+    def get_object(self, pk):
+        try:
+            return Vente.objects.get(pk=pk)
+        except Vente.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk):
+        vente = self.get_object(pk)
+        serializer = VenteSerializer(vente)
+        return Response(serializer.data)
+
+    def put(self, request, pk):
+        vente = self.get_object(pk)
+        serializer = VenteSerializer(vente, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk):
+        vente = self.get_object(pk)
+        vente.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
