@@ -10,9 +10,10 @@ class Categorie(models.Model):
 
 class Produit(models.Model):
     nom = models.CharField(max_length=100)
-    quantite = models.PositiveIntegerField()
+    quantite = models.PositiveIntegerField()  # Quantité totale initiale
+    quantite_disponible = models.PositiveIntegerField()  # Quantité disponible après les ventes
     description = models.TextField()
-    image = models.URLField() 
+    image = models.URLField()
     seuil = models.PositiveIntegerField()
     prix_unitaire = models.DecimalField(max_digits=10, decimal_places=2)
     code = models.ForeignKey(Categorie, on_delete=models.CASCADE)
