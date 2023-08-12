@@ -126,7 +126,7 @@ class VenteListCreateAPIView(APIView):
 
             montant_total = quantite_vendue * prix_unitaire
             vente.prix = montant_total
-            # vente.save()
+            vente.save()
 
             # Décrémenter la quantité disponible du produit
             if produit.quantite_disponible >= quantite_vendue:
@@ -136,7 +136,7 @@ class VenteListCreateAPIView(APIView):
                 vente.delete()  # Annuler la vente si la quantité n'est pas disponible
                 return Response({'error': 'Quantité disponible insuffisante pour la vente.'}, status=status.HTTP_400_BAD_REQUEST)
 
-            vente.save()
+            # vente.save()
 
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
