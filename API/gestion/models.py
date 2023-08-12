@@ -27,8 +27,20 @@ class Vente(models.Model):
     date = models.DateField()
     code = models.ForeignKey(Produit, on_delete=models.CASCADE)
 
+    def save(self, *args, **kwargs):
+        produit = self.code
+        quantite_vendue = self.quantite
+
+        if produit.quantite_disponible >= quantite_vendue:
+            produit.quantite_disponible -= quantite_vendue
+            produit.save()
+        else:
+            raise ValueError("Quantité disponible insuffisante pour la vente.")
+
+        super().save(*args, **kwargs)
+
     def __str__(self):
-        return f"Vente of {self.quantité} units on {self.date}"
+        return f"Vente of {self.quantite} units on {self.date}"
 
 class Facture(models.Model):
     ventes = models.ManyToManyField(Vente)  # Many-to-many relationship with Vente

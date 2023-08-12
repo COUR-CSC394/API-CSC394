@@ -117,8 +117,29 @@ class VenteListCreateAPIView(APIView):
     def post(self, request):
         serializer = VenteSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
+            vente = serializer.save()
+
+            # Calculer le prix en fonction de la quantité et du prix unitaire du produit
+            produit = vente.code  # Code du produit vendu
+            quantite_vendue = vente.quantite  # Quantité vendue dans la vente
+            prix_unitaire = produit.prix_unitaire
+
+            montant_total = quantite_vendue * prix_unitaire
+            vente.prix = montant_total
+            # vente.save()
+
+            # Décrémenter la quantité disponible du produit
+            if produit.quantite_disponible >= quantite_vendue:
+                produit.quantite_disponible -= quantite_vendue
+                produit.save()
+            else:
+                vente.delete()  # Annuler la vente si la quantité n'est pas disponible
+                return Response({'error': 'Quantité disponible insuffisante pour la vente.'}, status=status.HTTP_400_BAD_REQUEST)
+
+            vente.save()
+
             return Response(serializer.data, status=status.HTTP_201_CREATED)
+
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class VenteDetailAPIView(APIView):
@@ -137,16 +158,32 @@ class VenteDetailAPIView(APIView):
         vente = self.get_object(pk)
         serializer = VenteSerializer(vente, data=request.data)
         if serializer.is_valid():
+            ancienne_quantite = vente.quantite  # Quantité avant la mise à jour
+            nouvelle_quantite = serializer.validated_data.get('quantite')  # Nouvelle quantité dans la vente
+            if nouvelle_quantite > ancienne_quantite:
+                # Gérer la décrémentation de la quantité disponible du produit
+                produit = vente.produit
+                quantite_decrement = nouvelle_quantite - ancienne_quantite
+                if produit.quantite_disponible >= quantite_decrement:
+                    produit.quantite_disponible -= quantite_decrement
+                    produit.save()
+                else:
+                    return Response({'error': 'Quantité disponible insuffisante pour la vente.'},
+                                    status=status.HTTP_400_BAD_REQUEST)
+
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, pk):
         vente = self.get_object(pk)
+        # Restaurer la quantité disponible du produit lié en cas de suppression de la vente
+        produit = vente.produit
+        produit.quantite_disponible += vente.quantite
+        produit.save()
+
         vente.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
-
-
 
 # Facture Views
 class FactureListCreateAPIView(APIView):

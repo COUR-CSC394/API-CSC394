@@ -26,6 +26,7 @@ class Migration(migrations.Migration):
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('nom', models.CharField(max_length=100)),
                 ('quantite', models.PositiveIntegerField()),
+                ('quantite_disponible', models.PositiveIntegerField()),
                 ('description', models.TextField()),
                 ('image', models.URLField()),
                 ('seuil', models.PositiveIntegerField()),
