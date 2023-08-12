@@ -10,7 +10,7 @@ class Categorie(models.Model):
 
 class Produit(models.Model):
     nom = models.CharField(max_length=100)
-    quantité = models.PositiveIntegerField()
+    quantite = models.PositiveIntegerField()
     description = models.TextField()
     image = models.URLField() 
     seuil = models.PositiveIntegerField()
@@ -21,7 +21,7 @@ class Produit(models.Model):
         return self.nom
 
 class Vente(models.Model):
-    quantité = models.PositiveIntegerField()
+    quantite = models.PositiveIntegerField()
     prix = models.DecimalField(max_digits=10, decimal_places=2)
     date = models.DateField()
     code = models.ForeignKey(Produit, on_delete=models.CASCADE)
