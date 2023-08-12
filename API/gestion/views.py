@@ -186,3 +186,5 @@ class FactureDetailAPIView(APIView):
         facture = self.get_object(pk)
         facture.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+    
+    
