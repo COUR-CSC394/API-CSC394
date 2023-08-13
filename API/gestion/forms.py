@@ -17,6 +17,40 @@ class VenteSerializer(serializers.ModelSerializer):
         model = Vente
         fields = '__all__'
 
+    prix = serializers.IntegerField(read_only=True)
+
+    def validate_quantite(self, value):
+        if value <= 0:
+            raise serializers.ValidationError("La quantité doit être supérieure à zéro.")
+        
+        code = self.initial_data.get('code')
+        produit = Produit.objects.get(pk=code)
+        
+        if value > produit.quantite:
+            raise serializers.ValidationError("La quantité disponible est insuffisante pour cette vente.")
+        
+        return value
+
+    def create(self, validated_data):
+        code = validated_data.pop('code', None)
+        
+        if not code:
+            raise serializers.ValidationError("Vous devez fournir le produit.")
+        
+        quantite = validated_data.pop('quantite')
+        
+        prix_unitaire = code.prix_unitaire
+        prix_total = quantite * prix_unitaire
+        
+        vente = Vente.objects.create(code=code, quantite=quantite, prix=prix_total, **validated_data)
+
+        # Décrémenter la quantité du produit vendu
+        code.quantite -= quantite
+        code.save()
+
+        return vente
+
+
 class FactureSerializer(serializers.ModelSerializer):
     class Meta:
         model = Facture
@@ -25,7 +59,7 @@ class FactureSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['username', 'email', 'password']
+        fields = ['username', 'email', 'password','first_name','last_name']
         extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):

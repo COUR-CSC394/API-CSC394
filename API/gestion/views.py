@@ -6,6 +6,8 @@ from rest_framework.authtoken.models import Token
 from django.contrib.auth.models import User
 from rest_framework import generics, permissions
 from rest_framework.authtoken.views import ObtainAuthToken
+from rest_framework.decorators import api_view
+from django.http import JsonResponse
 
 from .forms import (
     CategorieSerializer,
@@ -25,7 +27,22 @@ class CustomAuthToken(ObtainAuthToken):
     def post(self, request, *args, **kwargs):
         response = super().post(request, *args, **kwargs)
         token = Token.objects.get(key=response.data['token'])
-        return Response({'token': token.key, 'user_id': token.user_id})
+        user = token.user
+        print("Token:", token.key)
+        print("User ID:", user.id)
+        print("Username:", user.username)
+        print("Email:", user.email)
+        print("First Name:", user.first_name)
+        print("Last Name:", user.last_name)
+        return Response({
+            'token': token.key,
+            'user_id': user.id,
+            'username': user.username,
+            'email': user.email,
+            'first_name': user.first_name,
+            'last_name': user.last_name,
+        })
+
 
 
 # Categorie Views
@@ -66,7 +83,12 @@ class CategorieDetailAPIView(APIView):
         categorie = self.get_object(pk)
         categorie.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
-
+    
+@api_view(['GET'])
+def produits_rupture_stok(request):
+    produits = Produit.rupture_stoks()
+    serializer = ProduitSerializer(produits, many=True)
+    return JsonResponse(serializer.data, safe=False)
 
 # Produit Views
 class ProduitListCreateAPIView(APIView):
@@ -141,6 +163,7 @@ class VenteListCreateAPIView(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 class VenteDetailAPIView(APIView):
     def get_object(self, pk):
