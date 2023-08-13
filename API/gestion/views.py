@@ -25,6 +25,7 @@ class CustomAuthToken(ObtainAuthToken):
     def post(self, request, *args, **kwargs):
         response = super().post(request, *args, **kwargs)
         token = Token.objects.get(key=response.data['token'])
+        print(token)
         return Response({'token': token.key, 'user_id': token.user_id})
 
 
@@ -120,6 +121,7 @@ class VenteListCreateAPIView(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 class VenteDetailAPIView(APIView):
     def get_object(self, pk):

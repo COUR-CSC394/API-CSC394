@@ -1,5 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
+from decimal import Decimal
+
 
 class Categorie(models.Model):
     nom = models.CharField(max_length=100)
@@ -22,12 +24,12 @@ class Produit(models.Model):
 
 class Vente(models.Model):
     quantite = models.PositiveIntegerField()
-    prix = models.DecimalField(max_digits=10, decimal_places=2)
+    prix = models.IntegerField()  # Changer le type en IntegerField
     date = models.DateField()
     code = models.ForeignKey(Produit, on_delete=models.CASCADE)
 
-    def __str__(self):
-        return f"Vente of {self.quantité} units on {self.date}"
+   
+
 
 class Facture(models.Model):
     ventes = models.ManyToManyField(Vente)  # Many-to-many relationship with Vente
