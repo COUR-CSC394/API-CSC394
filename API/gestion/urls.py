@@ -1,4 +1,6 @@
 from django.urls import path
+from .models import Produit
+from . import views
 from .views import (
     CategorieListCreateAPIView,
     CategorieDetailAPIView,
@@ -23,5 +25,6 @@ urlpatterns = [
     path('factures/<int:pk>/', FactureDetailAPIView.as_view(), name='facture-detail'),
     path('register/', UserRegistrationView.as_view(), name='user-register'),
     path('login/', CustomAuthToken.as_view(), name='user-login'),
+    path('rupture/stok/', views.produits_rupture_stok, name='rupture'),
 ]
 

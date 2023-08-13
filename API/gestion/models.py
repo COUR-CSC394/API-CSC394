@@ -1,6 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import User
 from decimal import Decimal
+from django.db.models import F
+
 
 
 class Categorie(models.Model):
@@ -18,6 +20,10 @@ class Produit(models.Model):
     seuil = models.PositiveIntegerField()
     prix_unitaire = models.DecimalField(max_digits=10, decimal_places=2)
     code = models.ForeignKey(Categorie, on_delete=models.CASCADE)
+
+    @classmethod
+    def rupture_stoks(cls):
+        return cls.objects.filter(quantite__lte=F('seuil'))
 
     def __str__(self):
         return self.nom
